@@ -33,7 +33,7 @@ android.permissions = READ_EXTERNAL_STORAGE,READ_MEDIA_VIDEO,WAKE_LOCK
 
 # (int) Target Android API
 android.api = 34
-android.build_tools = 34.0.0
+android.accept_sdk_license = True
 
 # (int) Minimum API required
 android.minapi = 23
