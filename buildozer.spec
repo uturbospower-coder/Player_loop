@@ -36,7 +36,7 @@ android.api = 34
 android.accept_sdk_license = True
 
 # (int) Minimum API required
-android.minapi = 23
+android.minapi = 24
 
 # (list) The Android archs to build for
 android.archs = arm64-v8a, armeabi-v7a
