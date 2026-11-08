@@ -20,6 +20,7 @@ version = 0.1
 
 # (list) Application requirements
 requirements = python3==3.11.11,hostpython3==3.11.11,kivy
+p4a.branch = develop
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = landscape
