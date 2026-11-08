@@ -36,8 +36,28 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython==3.0.11
 
+      # Анти-504: заранее скачиваем архив Python в папку пакетов buildozer,
+      # чтобы p4a не качал его с python.org во время сборки.
+      - name: Pre-download Python sources (anti-504)
+        run: |
+          mkdir -p ~/.buildozer/android/packages/downloads
+          for i in 1 2 3 4 5; do
+            curl -L --fail --retry 10 --retry-delay 15 \
+              -o ~/.buildozer/android/packages/downloads/Python-3.11.11.tgz \
+              https://www.python.org/ftp/python/3.11.11/Python-3.11.11.tgz && break
+            echo "Попытка $i не удалась, жду 30 секунд..."
+            sleep 30
+          done
+
       - name: Build APK
         run: buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: videolooper-apk
+          path: bin/*.apk
+
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
