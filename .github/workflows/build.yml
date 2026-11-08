@@ -36,18 +36,38 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython==3.0.11
 
-      # Анти-504: заранее скачиваем архив Python в папку пакетов buildozer,
-      # чтобы p4a не качал его с python.org во время сборки.
+      # Анти-504, часть 1: терпеливо скачиваем архив Python,
+      # чтобы buildozer не качал его сам во время сборки.
       - name: Pre-download Python sources (anti-504)
         run: |
           mkdir -p ~/.buildozer/android/packages/downloads
           for i in 1 2 3 4 5; do
-            curl -L --fail --retry 10 --retry-delay 15 \
+            curl -L --fail --retry 10 --retry-delay 15 --retry-all-errors \
               -o ~/.buildozer/android/packages/downloads/Python-3.11.11.tgz \
               https://www.python.org/ftp/python/3.11.11/Python-3.11.11.tgz && break
             echo "Попытка $i не удалась, жду 30 секунд..."
             sleep 30
           done
+
+      # Анти-504, часть 2: терпеливо скачиваем и распаковываем NDK r28c (722 МБ),
+      # чтобы buildozer увидел готовую папку и пропустил свою загрузку.
+      - name: Pre-download Android NDK (anti-504)
+        run: |
+          NDK_DIR=~/.buildozer/android/platform/android-ndk-r28c
+          if [ -f "$NDK_DIR/source.properties" ]; then
+            echo "NDK r28c уже на месте (из кэша)"
+            exit 0
+          fi
+          mkdir -p ~/.buildozer/android/platform
+          for i in 1 2 3 4 5; do
+            curl -L --fail --retry 10 --retry-delay 15 --retry-all-errors \
+              -o /tmp/android-ndk-r28c.zip \
+              https://dl.google.com/android/repository/android-ndk-r28c-linux.zip && break
+            echo "Попытка $i не удалась, жду 30 секунд..."
+            sleep 30
+          done
+          unzip -q /tmp/android-ndk-r28c.zip -d ~/.buildozer/android/platform/
+          rm -f /tmp/android-ndk-r28c.zip
 
       - name: Build APK
         run: buildozer android debug
@@ -57,9 +77,6 @@ jobs:
         with:
           name: videolooper-apk
           path: bin/*.apk
-
-
-      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: videolooper-apk
